@@ -1,5 +1,7 @@
 io.stdout:setvbuf("no") -- to print on the console realtime (sublime text)
 
+require("AI")
+
 function love.load()
 	love.window.setMode(500,500)
 	draw = love.graphics.newImage('assets/draw.png') --show the draw window
@@ -11,8 +13,21 @@ function love.load()
 	squares = {{35, 40},{190, 40},{345, 40},{35, 190},{190, 190},{345, 190},{35, 345},{190, 345},{345, 345}} -- our board hitboxes
 	turn = 1
 	isWon = -1 -- no = -1, win = 1, draw = 2
+	depth = 0
 end
 
+function love.update(dt)
+	if turn == 2 then
+		depth = depth+1
+	    AIMove = minmax(turns,depth, isWon,turn)[2]
+	    --print(AIMove)
+	    table.insert(symbols,{drawables[turn], AIMove, turn}) --inserts the square for drawing
+
+    	turns[AIMove] = turn --tell our match state logic that we used a square
+
+    	isWon, turn = checkBoard(turns, isWon, turn) -- now we check if someone won the game
+	end
+end
 function love.draw()
 	if isWon == -1 then --while the game is still not won continue drawing
 	    love.graphics.draw(background, 0, 0)
@@ -44,7 +59,7 @@ function love.mousereleased(x,y,button)
 
 	    	turns[squareKey] = turn --tell our match state logic that we used a square
 
-	    	checkBoard() -- now we check if someone won the game
+	    	isWon, turn = checkBoard(turns, isWon, turn) -- now we check if someone won the game
 
 	    end
 	end
@@ -74,54 +89,4 @@ function validateInput(squareKey)
 		end
 	end
 	return isValid
-end
-
-function checkBoard()
-
-	for i=7,1,-3 do
-		--print(i,i+1,i+2) --uncomment to understand the loops functionality
-		if (turns[i] == 1 and turns[i+1] == 1 and turns[i+2] == 1) or (turns[i] == 2 and turns[i+1] == 2 and turns[i+2] == 2) then
-			print('here 1')
-		    --checks for horizontal win
-		    isWon = 1
-		end
-	end
-
-	for i=1,3 do
-		--[[uncomment the two lines below to understand how these work
-			print(i,i+3,i+6)
-			print('-------')
-			]]--
-		if (turns[i] == 1 and turns[i+3] == 1 and turns[i+6] == 1) or (turns[i] == 2 and turns[i+3] == 2 and turns[i+6] == 2) then
-		    --checks for vertical win
-		    print('here 2')
-		    isWon = 1
-		end
-	end
-
-	for i=3,1,-2 do
-		--[[uncomment the two lines below to understand how these work
-			print('-------')
-			print(i,5,10-i)]]--
-		if (turns[i] == 1 and turns[5] == 1 and turns[10-i] == 1) or (turns[i] == 2 and turns[5] == 2 and turns[10-i] == 2) then
-		    --checks for a Cross win
-		    print('here 3')
-		    isWon = 1
-		end
-	end
-
-	
-	--now we check for draw
-	if table.getn(symbols) == 9 and isWon == -1 then
-	    --its a draw fellas
-	    isWon = 2
-	end
-
-	if isWon == -1 then
-	    if turn > 1 then --switch turns
-    	    turn = 1
-    	else
-    	    turn = 2
-    	end
-	end
 end
