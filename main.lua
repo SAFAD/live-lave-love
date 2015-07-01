@@ -2,11 +2,11 @@ io.stdout:setvbuf("no")
 
 function love.load()
 	love.window.setMode(500,500)
-	background = love.graphics.newImage('assets/background.png')
-	drawables = {love.graphics.newImage('assets/X.png'), love.graphics.newImage('assets/O.png')}
-	turns = {0,0,0,0,0,0,0,0,0}
+	background = love.graphics.newImage('assets/background.png') -- a neat chalkboard object
+	drawables = {love.graphics.newImage('assets/X.png'), love.graphics.newImage('assets/O.png')} -- our X and O as drawable objects
+	turns = {0,0,0,0,0,0,0,0,0} -- exclusive for the match state logic (neutral/win/draw)
 	symbols = {} --example on a symbol array == {drawble, squareKey,turn}
-	squares = {{35, 40},{190, 40},{345, 40},{35, 190},{190, 190},{345, 190},{35, 345},{190, 345},{345, 345}}
+	squares = {{35, 40},{190, 40},{345, 40},{35, 190},{190, 190},{345, 190},{35, 345},{190, 345},{345, 345}} -- our board hitboxes
 	turn = 1
 end
 
@@ -23,17 +23,23 @@ end
 
 function love.mousereleased(x,y,button)
 	if button == 'l' then
-	    squareKey = checkMouseHit(x,y)
+	    squareKey = checkMouseHit(x,y) --check if the mouse hits one of our drawable squares
+
 	    if squareKey ~= null and
-	    	validateInput(squareKey) then
-	    	table.insert(symbols,{drawables[turn], squareKey, turn})
-	    	turns[squareKey] = turn
-	    	checkBoard()
-	    	if turn > 1 then
+	    	validateInput(squareKey) then --now we check if its a usable square
+
+	    	table.insert(symbols,{drawables[turn], squareKey, turn}) --inserts the square for drawing
+
+	    	turns[squareKey] = turn --tell our match state logic that we used a square
+
+	    	checkBoard() -- now we check if someone won the game
+
+	    	if turn > 1 then --switch turns
 	    	    turn = 1
 	    	else
 	    	    turn = 2
 	    	end
+
 	    end
 	end
 end
@@ -44,7 +50,7 @@ function checkMouseHit(mouseX, mouseY)
 		if mouseX < value[1]+115 and
 		   mouseY < value[2]+115 and
 		   value[1] < mouseX and
-		   value[2] < mouseY then
+		   value[2] < mouseY then -- simply put, check if the clicked mouse location is inside the square
 		   
 		   squareKey = key
 		   break
@@ -56,7 +62,7 @@ end
 function validateInput(squareKey)
 	local isValid = true
 	for i,v in ipairs(symbols) do
-		if v[2] == squareKey then
+		if v[2] == squareKey then -- loop through the drawn symbols, if we match something, break to return false
 		    isValid = false
 		    break
 		end
@@ -64,7 +70,7 @@ function validateInput(squareKey)
 	return isValid
 end
 
-function checkBoard(...)
+function checkBoard()
 	local isWon = -1 -- no = -1, win = 1, draw = 2
 	local turnsCount = 0
 
