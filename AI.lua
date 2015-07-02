@@ -1,48 +1,15 @@
+local AI = class('AI')
+
+function AI:initialize(...)
+    
+end
+
+
 function checkBoard(turns, isWon, turn)
     --print(unpack(turns))
-    for i=7,1,-3 do
-        --print(i,i+1,i+2) --uncomment to understand the loops functionality
-        if (turns[i] == 1 and turns[i+1] == 1 and turns[i+2] == 1) or (turns[i] == 2 and turns[i+1] == 2 and turns[i+2] == 2) then
-            --checks for horizontal win
-            isWon = 1
-        end
-    end
-
-    for i=1,3 do
-        --[[uncomment the two lines below to understand how these work
-            print(i,i+3,i+6)
-            print('-------')
-            ]]--
-        if (turns[i] == 1 and turns[i+3] == 1 and turns[i+6] == 1) or (turns[i] == 2 and turns[i+3] == 2 and turns[i+6] == 2) then
-            --checks for vertical win
-            isWon = 1
-        end
-    end
-
-    for i=3,1,-2 do
-        --[[uncomment the two lines below to understand how these work
-            print('-------')
-            print(i,5,10-i)]]--
-        if (turns[i] == 1 and turns[5] == 1 and turns[10-i] == 1) or (turns[i] == 2 and turns[5] == 2 and turns[10-i] == 2) then
-            --checks for a Cross win
-            isWon = 1
-        end
-    end
+    
 
     
-    --now we check for draw
-    if table.getn(symbols) == 9 and isWon == -1 then
-        --its a draw fellas
-        isWon = 2
-    end
-
-    if isWon == -1 then
-        if turn > 1 then --switch turns
-            turn = 1
-        else
-            turn = 2
-        end
-    end
     return isWon, turn
 end
 
@@ -134,41 +101,3 @@ function min(array)
     return index
 end
 
---[[ the AI mumbo Jumbo starts here
-def score(game, depth)
-    if game.win?(@player)
-        return 10 - depth
-    elsif game.win?(@opponent)
-        return depth - 10
-    else
-        return 0
-    end
-end
-
-def minimax(game, depth)
-    return score(game) if game.over?
-    depth += 1
-    scores = [] # an array of scores
-    moves = []  # an array of moves
-
-    # Populate the scores array, recursing as needed
-    game.get_available_moves.each do |move|
-        possible_game = game.get_new_state(move)
-        scores.push minimax(possible_game, depth)
-        moves.push move
-    end
-
-    # Do the min or the max calculation
-    if game.active_turn == @player
-        # This is the max calculation
-        max_score_index = scores.each_with_index.max[1]
-        @choice = moves[max_score_index]
-        return scores[max_score_index]
-    else
-        # This is the min calculation
-        min_score_index = scores.each_with_index.min[1]
-        @choice = moves[min_score_index]
-        return scores[min_score_index]
-    end
-end
-]]--
