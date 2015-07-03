@@ -16,10 +16,6 @@ function Game:resetVariablesTable()
     _V = {turns = self.turns, symbols = self.symbols, depth =  self.depth, turn =  self.turn, squares = self.squares} --exclusively used for get and set variable methods
 end
 
-function Game:getVariable(variableName)
-    return _V[variableName]
-end
-
 function Game:setVariable(variableName, value, args)
     if args ~= null then
         _V[variableName][args] = value

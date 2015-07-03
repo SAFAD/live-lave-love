@@ -1,84 +1,76 @@
-local AI = class('AI')
-
-function AI:initialize(...)
-    
+local class = require("middleclass")
+require('Game')
+AI = class('AI')
+function AI:initialize(gameObject, depth)
+    self.choice = null
+    self:minmax(gameObject, depth)
 end
 
-
-function checkBoard(turns, isWon, turn)
-    --print(unpack(turns))
-    
-
-    
-    return isWon, turn
-end
-
-function score(isWon, depth)
-	if isWon == 1 then
-	    if turn == 1 then
-	        return 10 - depth --calculate score for player
-	    else
-	        return depth - 10 -- score for AI
-	    end
-	end
-	if isWon == 2 then
+function AI:Score(gameObject, depth)
+    status = gameObject:status()
+    turn = gameObject.turn
+    if status == 1 then
+        if turn == 1 then
+            return 10 - depth --calculate score for player
+        else
+            return depth - 10 -- score for AI
+        end
+    end
+    if status == 2 then
         return 0 -- a draw return
     end
 end
 
-chosenMove = null
-
-function minmax(board, depth, isWon, turn)
-    
-    local isWon, turn = checkBoard(board, isWon, turn)
-    
-    
-    if isWon == 1 or isWon == 2 then
-        print('I AM HERE BOY')
-        return {score(isWon, depth), chosenMove}
+function AI:minmax(gameObject, depth)
+    if gameObject:status() == 1 or gameObject:status() == 2 then
+        return self:Score(gameObject)
     end
 
     depth = depth+1
-    scores = {}
-    moves = {}
-
-    for i,v in ipairs(getAvailableMoves(board)) do
-        possibleMove = getNewBoard(board, v, turn)
-        minmaxv = minmax(possibleMove, depth, isWon, turn)
-        chosenMove = minmaxv[3]
-        table.insert(scores, minmaxv[1])
+    local scores = {}
+    local moves = {}
+    for i,v in ipairs(self:getAvailableMoves(gameObject)) do
+        print('heeere')
+        local possibleMove = gameObject.turns
+        possibleMove[v] = gameObject.turn
+        possibleGame = Game:new(possibleMove,
+                        gameObject.turn,
+                        {},--example on a symbol array == {drawble, squareKey,turn}
+                        depth, 
+                        {{35, 40},{190, 40},{345, 40},{35, 190},{190, 190},{345, 190},{35, 345},{190, 345},{345, 345}}) --board hitboxes
+        currScore = self:Score(possibleGame, depth)
+        table.insert(scores,currScore)
         table.insert(moves, v)
     end
 
-    if turn == 1 then
-        maxScoreIndex = max(scores)
-        chosenMove = moves[maxScoreIndex]
-        return {scores[maxScoreIndex], chosenMove}
+    if gameObject.turn == 1 then
+        maxScoreIndex = self:max(scores)
+        self.choice = moves[maxScoreIndex]
+        return scores[maxScoreIndex]
     else
-        minScoreIndex = min(scores)
-        chosenMove = moves[minScoreIndex]
-        return {scores[minScoreIndex], chosenMove}
+        minScoreIndex = self:min(scores)
+        self.choice = moves[minScoreIndex]
+        return scores[minScoreIndex]
     end
-
+end
+function AI:getChoice()
+    return self.choice
 end
 
-function getAvailableMoves(board)
+function AI:getAvailableMoves(gameObject)
     local moves = {}
-    for i,v in ipairs(board) do
+    local board = gameObject.turns
 
+    for i,v in ipairs(board) do
         if v == 0 then
             table.insert(moves, i)
         end
     end
+
     return moves
 end
 
-function getNewBoard(board, move, turn)
-    board[move] = turn
-    return board
-end
-
-function max(array)
+function AI:max(array)
     local index = 0
     local max = 0
     for i, v in ipairs(array) do
@@ -89,7 +81,7 @@ function max(array)
     return index
 end
 
-function min(array)
+function AI:min(array)
     local index = 0
     local min = 0
     for i, v in ipairs(array) do
@@ -100,4 +92,3 @@ function min(array)
     end
     return index
 end
-

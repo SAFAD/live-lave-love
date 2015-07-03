@@ -1,5 +1,5 @@
 io.stdout:setvbuf("no") -- to print on the console realtime (sublime text)
---require("AI")
+require("AI")
 require("Game")
 
 function love.load()
@@ -18,28 +18,28 @@ end
 
 function love.update(dt)
 	local status = mainGame:status()
-	
-	--[[if status == -1 then --the game is still going
-	    if turn == 2 then
-		    AIMove = minmax(turns,depth, isWon,turn)[2]
-	    	table.insert(symbols,{drawables[turn], AIMove, turn}) --inserts the square for drawing
+	if status == -1 and mainGame.turn == 2 then
 
-    		turns[AIMove] = turn --tell our match state logic that we used a square
+		    AI = AI:new(mainGame, 0)
+		    symbols = mainGame.symbols
+	    	choice = AI:getChoice()
+	    	table.insert(symbols,{drawables[mainGame.turn], choice, mainGame.turn}) --inserts the square for drawing
+	    	mainGame:setVariable('symbols', symbols)
+	    	mainGame:setVariable('turns', mainGame.turn, choice)
 
-    		isWon, turn = checkBoard(turns, isWon, turn) -- now we check if someone won the game
-		end
-	end]]--
+	    	mainGame:switchTurns()
+	    	mainGame:resetVariablesTable()
+	end
 	
 end
 function love.draw()
 	local status = mainGame:status()
-
 	if status == -1 then --while the game is still not won continue drawing
 	    love.graphics.draw(background, 0, 0)
 	    --NOTE : spacing between columns is 155
 	    --love.graphics.draw(X, 35, 40)
-	    symbols = mainGame:getVariable('symbols')
-	    squares = mainGame:getVariable('squares')
+	    symbols = mainGame.symbols
+	    squares = mainGame.squares
 	    for i,v in ipairs(symbols) do
 	    	love.graphics.draw(symbols[i][1], squares[symbols[i][2]][1], squares[symbols[i][2]][2])
 	    end
@@ -58,16 +58,14 @@ function love.mousereleased(x,y,button)
 	if button == 'l' then
 	    squareKey = mainGame:checkMouseHit(x,y) --check if the mouse hits one of our drawable squares
 	    if mainGame:validateInput(squareKey) then --now we check if its a usable square
-	    	symbols = mainGame:getVariable('symbols')
-	    	turn = mainGame:getVariable('turn')
+	    	symbols = mainGame.symbols
+	    	turn = mainGame.turn
 	    	table.insert(symbols,{drawables[turn], squareKey, turn}) --inserts the square for drawing
 	    	mainGame:setVariable('symbols', symbols)
 	    	mainGame:setVariable('turns', turn,squareKey)
 
 	    	mainGame:switchTurns()
 	    	mainGame:resetVariablesTable()
-	    	--checkBoard(turns, isWon, turn) -- now we check if someone won the game
-
 	    end
 	end
 end
